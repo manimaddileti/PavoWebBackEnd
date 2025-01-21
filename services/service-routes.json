@@ -1,0 +1,33 @@
+{
+    "home": {
+      "menuList": {
+        "endpoint": "HeaderSection",
+        "method": "GET"
+      },
+      "Highlights": {
+        "endpoint": "PlatformHighlights",
+        "method": "GET"
+      },
+      "content": {
+        "endpoint": "PageContent",
+        "method": "GET"
+      },
+      "subscription": {
+        "endpoint": "SubscriptionDetail",
+        "method": "GET"
+      },
+      "Subscription1": {
+        "endpoint": "SubscriptionDescriptionList",
+        "method": "GET"
+      },
+      "ActivityMetrics": {
+        "endpoint": "ActivityMetrics",
+        "method": "GET"
+      },
+      "testmonial": {
+        "endpoint": "Testmonials",
+        "method": "GET"
+      }
+    }
+  }
+  
