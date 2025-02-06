@@ -39,9 +39,7 @@ export const generateApiEndPoint = ({
   const baseURL = getEnvironmentVariables(EnvLabel.apiBaseURL);
 //   console.log("baseURL=>",baseURL);
 
-  let url = `https://localhost:7141/api/${endpoint}`;
-
-
+  let url = `https://localhost:7141/Pavo/${endpoint}`;
   if (pathParams) url = `${url}/${pathParams}`;
 
   if (queryParams) {

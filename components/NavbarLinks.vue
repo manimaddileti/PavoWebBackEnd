@@ -1,3 +1,67 @@
+<script setup lang="ts">
+import { defineProps, defineEmits, ref } from 'vue'
+import { GetMenuListApi } from '~/services/home'
+import type { TMenus } from '~/types/api-data-type'
+import { getMenusData } from '~/utils/common'
+const props = defineProps({
+  activeLink: String,
+  dropdownOpen: Boolean,
+})
+const emit = defineEmits(['setActiveLink', 'toggleDropdown'])
+const isMenuOpen = ref(false)
+const showScrollToTop = ref(false)
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value
+}
+const setActiveLink = (link: string) => {
+  emit('setActiveLink', link)
+}
+const toggleDropdown = () => {
+  emit('toggleDropdown')
+}
+const closeMenuAndSetActiveLink = (link: string) => {
+  isMenuOpen.value = false
+  setActiveLink(link)
+}
+const handleScroll = () => {
+  if (window.scrollY > window.innerHeight * 1.5) {
+    showScrollToTop.value = true
+  } else {
+    showScrollToTop.value = false
+  }
+}
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+  // GetMenuListData()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+const HeaderList = ref<TMenus[]>([])
+
+async function GetMenuListData() {
+  const { data = null, status = 500 } = await GetMenuListApi()
+
+  if (status == 200) {
+    HeaderList.value = getMenusData(data)
+  } else {
+    HeaderList.value = []
+  }
+}
+const getLinkText = (name: string, id: number) => {
+  return computed(() => {
+    return HeaderList.value.length > 0 &&
+      HeaderList.value.some((item) => item.name === name && item.id === id)
+      ? name
+      : name
+  })
+}
+</script>
+
 <template>
   <div>
     <nav v-if="!isMenuOpen" class="flex">
@@ -17,9 +81,7 @@
           activeLink === 'features' ? 'text-[#ff6e84]' : 'text-[#6b747b]',
           'text-[14px] font-semibold transition-colors duration-[800ms] ease-in-out hover:text-[#ff6e84] lg:p-[10px]',
         ]"
-        @click="setActiveLink('features')"
-      >
-        <!-- Features -->
+        @click="setActiveLink('features')">
         {{ getLinkText('Features', 13) }}
       </nuxt-link>
       <nuxt-link
@@ -40,7 +102,6 @@
         ]"
         @click="setActiveLink('pricing')"
       >
-        <!-- Pricing -->
         {{ getLinkText('Pricing', 15) }}
       </nuxt-link>
 
@@ -54,11 +115,6 @@
           @click="toggleDropdown"
         >
           {{ getLinkText('Drop', 16) }}
-          <!-- <img
-            src="../assets/images/downArrow1.svg"
-            class="h-3 text-[#ff6e84] ml-1"
-            alt="Dropdown Arrow"
-          /> -->
         </a>
         <div
           v-if="dropdownOpen"
@@ -71,14 +127,14 @@
           >
             Article Details
           </nuxt-link>
-          <!-- <div class="dropdown-divider my-1 bg-gray-200"></div> -->
+
           <nuxt-link
             to="#terms"
             class="block px-4 py-2 text-[#6b747b] hover:text-[#ff6e84] whitespace-nowrap"
           >
             Terms & Conditions
           </nuxt-link>
-          <!-- <div class="dropdown-divider my-1 bg-gray-200"></div> -->
+
           <nuxt-link
             to="#privacy"
             class="block px-4 py-2 text-[#6b747b] hover:text-[#ff6e84] whitespace-nowrap"
@@ -98,18 +154,6 @@
       >
         {{ getLinkText('Download', 17) }}
       </nuxt-link>
-
-      <!-- <div class="social-icons flex space-x-3 mt-[-1px] lg:p-[13px]">
-        <a
-          href="#apple"
-          class="fab fa-apple text-[4px] cursor-pointer text-indigo-600 hover:text-[#ff6e84]"
-        ></a>
-        <a
-          href="#android"
-          class="fab fa-android text-xs cursor-pointer text-indigo-600 hover:text-[#ff6e84]"
-        >
-      </a>
-      </div> -->
       <span class="social-icons flex gap-2 items-center lg:ml-[14px]">
         <a
           href="#apple"
@@ -250,16 +294,6 @@
         class="cursor-pointer bg-center bg-[length:100%_100%] w-6 h-8"
       />
     </div>
-    <!-- <div>
-      <a
-        href="#home"
-        v-show="showScrollToTop"
-        @click.prevent="scrollToTop"
-        class="fixed bottom-3 right-2 bg-[rgb(52,62,72)] p-2 rounded-full shadow-md hover:bg-black transition-colors duration-300 flex items-center justify-center"
-      >
-        <img src="/features/up-arrow.png" alt="Up Arrow" class="upArrow" />
-      </a>
-    </div> -->
     <div>
       <a
         href="#home"
@@ -272,74 +306,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { defineProps, defineEmits, ref } from 'vue'
-import { GetMenuListApi } from '~/services/home'
-import type { TMenus } from '~/types/api-data-type'
-import { getMenusData } from '~/utils/common'
-
-const props = defineProps({
-  activeLink: String,
-  dropdownOpen: Boolean,
-})
-
-const emit = defineEmits(['setActiveLink', 'toggleDropdown'])
-const isMenuOpen = ref(false)
-const showScrollToTop = ref(false)
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value
-}
-
-const setActiveLink = (link: string) => {
-  emit('setActiveLink', link)
-}
-
-const toggleDropdown = () => {
-  emit('toggleDropdown')
-}
-const closeMenuAndSetActiveLink = (link: string) => {
-  isMenuOpen.value = false
-  setActiveLink(link)
-}
-const handleScroll = () => {
-  if (window.scrollY > window.innerHeight * 1.5) {
-    showScrollToTop.value = true
-  } else {
-    showScrollToTop.value = false
-  }
-}
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-  GetMenuListData()
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
-const HeaderList = ref<TMenus[]>([])
-
-async function GetMenuListData() {
-  const { data = null, status = 500 } = await GetMenuListApi()
-
-  if (status == 200) {
-    HeaderList.value = getMenusData(data)
-  } else {
-    HeaderList.value = []
-  }
-}
-const getLinkText = (name: string, id: number) => {
-  return computed(() => {
-    return HeaderList.value.length > 0 &&
-      HeaderList.value.some((item) => item.name === name && item.id === id)
-      ? name
-      : name
-  })
-}
-</script>
 
 <style scoped>
 @media (max-width: 950px) {

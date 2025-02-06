@@ -27,6 +27,11 @@
       "testmonial": {
         "endpoint": "Testmonials",
         "method": "GET"
+      },
+
+      "FooterDetails": {
+        "endpoint": "Footer",
+        "method": "GET"
       }
     }
   }

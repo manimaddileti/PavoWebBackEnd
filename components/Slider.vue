@@ -1,3 +1,79 @@
+<script lang="ts" setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { GetTestmonials } from '~/services/home'
+type Theader = {
+  id: number
+  name: string
+  description: string
+  designation: string
+  image: string
+}
+const TestData = ref<Theader[]>([])
+const currentIndex = ref(0)
+const itemsPerPage = 3
+const isButtonActive = ref(false)
+const isAutoPlayActive = ref(true)
+let autoplayInterval: ReturnType<typeof setInterval>
+const totalTestimonials = ref(0)
+const isLoading = ref(true)
+
+const GetStatisticsData = async () => {
+  try {
+    const { data = null, status = 500 } = await GetTestmonials()
+    if (status === 200 && data) {
+      TestData.value = data
+      totalTestimonials.value = TestData.value.length
+      isLoading.value = false
+    } else {
+      console.error('Failed to fetch testimonials data.')
+    }
+  } catch (error) {
+    console.error('Error fetching testimonials data:', error)
+  }
+}
+
+const visibleTestimonials = computed(() => {
+  const start = currentIndex.value
+  const end = (start + itemsPerPage) % totalTestimonials.value
+  if (end > start) {
+    return TestData.value.slice(start, end)
+  }
+  return [
+    ...TestData.value.slice(start, totalTestimonials.value),
+    ...TestData.value.slice(0, end),
+  ]
+})
+
+const next = () => {
+  currentIndex.value = (currentIndex.value + 1) % totalTestimonials.value
+  handleButtonClick()
+}
+const prev = () => {
+  currentIndex.value =
+    (currentIndex.value - 1 + totalTestimonials.value) % totalTestimonials.value
+  handleButtonClick()
+}
+const handleButtonClick = () => {
+  if (!isAutoPlayActive.value) {
+    isButtonActive.value = true
+    setTimeout(() => {
+      isButtonActive.value = false
+    }, 200)
+  }
+}
+
+onMounted(() => {
+  GetStatisticsData()
+  autoplayInterval = setInterval(() => {
+    if (isAutoPlayActive.value) next()
+  }, 3000)
+})
+
+onUnmounted(() => {
+  clearInterval(autoplayInterval)
+})
+</script>
+
 <template>
   <div class="bg-[#f1f9fc]">
     <p class="mb-12 text-center lg:max-w-xl lg:mx-auto custom-style">
@@ -12,7 +88,23 @@
         &lt;
       </button>
 
-      <div class="slider-container">
+      <div v-if="isLoading" class="slider-container">
+        <div class="slider">
+          <div
+            class="slider-item skeleton"
+            v-for="index in itemsPerPage"
+            :key="index"
+          >
+            <div class="testimonial-card skeleton-card">
+              <div class="skeleton-image"></div>
+              <div class="skeleton-text skeleton-description"></div>
+              <div class="skeleton-text skeleton-name"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="slider-container">
         <div class="slider">
           <div
             class="slider-item"
@@ -21,12 +113,14 @@
           >
             <div class="testimonial-card">
               <img
-                :src="`${test.image}`" 
+                :src="`${test.image}`"
                 alt="Profile Picture"
                 class="profile-pic"
               />
               <p class="details italic mb-3">{{ test.description }}</p>
-              <h4 class="designation">{{ test.designation }} - {{ test.name }}</h4>
+              <h4 class="designation">
+                {{ test.designation }} - {{ test.name }}
+              </h4>
             </div>
           </div>
         </div>
@@ -42,87 +136,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
-import { GetTestmonials } from "~/services/home";
-
-type Theader = { 
-  id: number; 
-  name: string; 
-  description: string; 
-  designation: string; 
-  image: string; 
-};
-
-const TestData = ref<Theader[]>([]);
-
-const currentIndex = ref(0);
-const itemsPerPage = 3;
-const isButtonActive = ref(false);
-const isAutoPlayActive = ref(true);
-let autoplayInterval: ReturnType<typeof setInterval>;
-const totalTestimonials = ref(0);
-
-const GetStatisticsData = async () => {
-  try {
-    const { data = null, status = 500 } = await GetTestmonials();
-    if (status === 200 && data) {
-      TestData.value = data;
-      console.log(data);
-      totalTestimonials.value = TestData.value.length;
-      console.log(TestData);
-    } else {
-      console.error("Failed to fetch testimonials data.");
-    }
-  } catch (error) {
-    console.error("Error fetching testimonials data:", error);
-  }
-};
-
-const visibleTestimonials = computed(() => {
-  const start = currentIndex.value;
-  const end = (start + itemsPerPage) % totalTestimonials.value;
-  if (end > start) {
-    return TestData.value.slice(start, end);
-  }
-  return [
-    ...TestData.value.slice(start, totalTestimonials.value),
-    ...TestData.value.slice(0, end),
-  ];
-});
-
-const next = () => {
-  currentIndex.value = (currentIndex.value + 1) % totalTestimonials.value;
-  handleButtonClick();
-};
-
-const prev = () => {
-  currentIndex.value =
-    (currentIndex.value - 1 + totalTestimonials.value) % totalTestimonials.value;
-  handleButtonClick();
-};
-
-const handleButtonClick = () => {
-  if (!isAutoPlayActive.value) {
-    isButtonActive.value = true;
-    setTimeout(() => {
-      isButtonActive.value = false;
-    }, 200);
-  }
-};
-
-onMounted(() => {
-  GetStatisticsData();
-  autoplayInterval = setInterval(() => {
-    if (isAutoPlayActive.value) next();
-  }, 3000); 
-});
-
-onUnmounted(() => {
-  clearInterval(autoplayInterval);
-});
-</script>
 
 <style scoped>
 .testimonial-slider {
@@ -149,10 +162,45 @@ onUnmounted(() => {
 }
 
 .slider-item {
-  flex: 0 0 33.33%; 
+  flex: 0 0 33.33%;
   padding: 0 10px;
   box-sizing: border-box;
   transition: transform 0.5s ease-in-out;
+}
+
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  background-color: #f1f9fc;
+  min-height: 200px;
+}
+
+.skeleton-image {
+  width: 80px;
+  height: 80px;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.skeleton-text {
+  width: 80%;
+  height: 16px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
+
+.skeleton-description {
+  width: 90%;
+}
+
+.skeleton-name {
+  width: 60%;
 }
 
 .testimonial-card {
@@ -167,7 +215,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 200px; 
+  min-height: 200px;
 }
 
 .profile-pic {
@@ -186,12 +234,12 @@ onUnmounted(() => {
 
 .details {
   color: #6b747b;
-  font-weight: 400; 
-  font-size: 1rem; 
-  line-height: 1.625rem; 
-  font-family: 'Open Sans', sans-serif; 
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.625rem;
+  font-family: 'Open Sans', sans-serif;
   text-align: center;
-  margin: 0 1rem; 
+  margin: 0 1rem;
 }
 
 .slider-button {
@@ -227,7 +275,6 @@ onUnmounted(() => {
   margin-top: 5rem;
 }
 
-/* Mobile responsiveness */
 @media (max-width: 1024px) {
   .slider-item {
     flex: 0 0 50%;

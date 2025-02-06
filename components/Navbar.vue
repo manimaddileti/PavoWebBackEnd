@@ -1,3 +1,30 @@
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useNavbarStore } from '../stores/navbar'
+import NavbarLinks from './NavbarLinks.vue'
+const navbarStore = useNavbarStore()
+const isScrolled = ref(false)
+const handleScroll = () => {
+  if (window.scrollY > 50) {
+    isScrolled.value = true
+  } else {
+    isScrolled.value = false
+  }
+}
+const setActiveLink = (link: string) => {
+  navbarStore.setActiveLink(link)
+}
+const toggleDropdown = () => {
+  navbarStore.toggleDropdown()
+}
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+</script>
+
 <template>
   <div
     :class="['navbar', isScrolled ? 'scrolled' : 'fixed-top top-nav-collapse']"
@@ -40,40 +67,6 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useNavbarStore } from '../stores/navbar'
-import NavbarLinks from './NavbarLinks.vue'
-
-const navbarStore = useNavbarStore()
-
-const isScrolled = ref(false)
-
-const handleScroll = () => {
-  if (window.scrollY > 50) {
-    isScrolled.value = true
-  } else {
-    isScrolled.value = false
-  }
-}
-
-const setActiveLink = (link: string) => {
-  navbarStore.setActiveLink(link)
-}
-
-const toggleDropdown = () => {
-  navbarStore.toggleDropdown()
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
-</script>
-
 <style scoped>
 @media (min-width: 1024px) {
   .navbar.top-nav-collapse {
@@ -86,7 +79,6 @@ onUnmounted(() => {
 .navbar {
   transition: all 0.3s ease;
 }
-
 .navbar.scrolled {
   padding-top: 0.2rem !important;
   padding-bottom: 0.2rem !important;

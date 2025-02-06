@@ -1,55 +1,40 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { socialLinks } from '~/constants/dataSets'
+
+let loading = ref(true)
+type Theader = {
+  id: number
+  title: string
+}
+const props = defineProps<{
+  downloadData: Theader | null
+}>()
+</script>
+
 <template>
   <div class="footer w-full">
     <div class="container px-4 sm:px-8 pt-[94px] pb-[1.9rem] lg:mb-0">
       <h4 class="mb-8 lg:max-w-3xl lg:mx-auto lg:mt-0.5">
-        {{ downloadData?.title }}
-        <!-- <div class="social-container">
+        <div v-if="!downloadData" class="skeleton-title"></div>
+        <span v-else>{{ downloadData?.title }}</span>
+        <div class="social-container">
           <span
             class="fa-stack"
             v-for="(social, index) in socialLinks"
             :key="index"
-          > -->
-            <!-- <a :href="social.link" class="social-icon">
-              <i :class="['fab', social.icon, 'fa-stack-1x']"></i>
+          >
+            <a :href="social.link" class="social-icon">
+              <i :class="['fab', social.icon, 'fa-stack-0.8x']"></i>
             </a>
-          </span> -->
-        <!-- </div> --> 
+            
+          </span>
+        </div>
       </h4>
     </div>
     <FooterBar />
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { GetMenuListApi } from '~/services/home';
-
-type Theader = { 
-  id: number;
-  description: string; 
-  title: string; 
-  image: string; 
-  type: string;
-};
-
-const menuList = ref<Theader[]>([]);
-const downloadData = ref<Theader | null>(null); // We will store the data for id: 4 here
-
-async function GetMenuListData() {
-  const { data = null, status = 500 } = await GetMenuListApi();
-  
-  if (status === 200) {
-    menuList.value = data;
-    downloadData.value = menuList.value.find(item => item.id === 5) || null;
-  } else {
-    menuList.value = [];
-  }
-}
-
-onMounted(() => {
-  GetMenuListData();
-});
-</script>
 
 <style scoped>
 .footer {
@@ -62,29 +47,20 @@ onMounted(() => {
   flex-direction: column;
 }
 
-.footer_content {
-  max-width: 48rem;
-  font-size: 22px;
-  font-weight: 700;
-  font-family: 'Open Sans', sans-serif;
+.skeleton-title {
+  width: 100%; 
+  height: 30px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
   margin: 0 auto;
-  /* padding: 32px; */
-  line-height: 1.3;
-  margin-left: auto;
-  margin-right: auto;
-  /* padding: 0 32px 32px 32p; */
-}
-
-a {
-  text-decoration: none;
 }
 
 .social-container {
-  /* display: flex; */
   justify-content: center;
   gap: none;
   margin-top: 2rem;
   flex-wrap: wrap;
+  animation: zigzag 2s linear infinite;
 }
 
 .social-container .social-icon {
@@ -111,41 +87,17 @@ a {
   line-height: inherit;
 }
 
-@media (max-width: 768px) {
-  .footer_content {
-    font-size: 18px;
-    /* padding: 24px; */
+@keyframes zigzag {
+  0% {
+    transform: translateY(0);
   }
 
-  .social-container .social-icon {
-    width: 45px;
-    height: 45px;
-    font-size: 18px;
-  }
-  /* .footer{
-    margin-bottom: none;
-  } */
-}
-
-@media (max-width: 480px) {
-  .footer_content {
-    font-size: 16px;
-    /* padding: 16px; */
+  30% {
+    transform: translateX(20px);
   }
 
-  .social-container {
-    justify-content: center;
-    gap: 5px;
+  100% {
+    transform: translateY(0);
   }
-
-  .social-container .social-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
-  }
-
-  /* .footer{
-    margin-bottom: none;
-  } */
 }
 </style>

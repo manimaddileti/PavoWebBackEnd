@@ -53,3 +53,11 @@ export async function GetTestmonials() {
 
   return response;
 }
+
+export async function GetFooter() {
+  const response = await ServiceCall({
+    ...home.FooterDetails,
+  });
+
+  return response;
+}

@@ -1,26 +1,26 @@
 <template>
   <div class="basic-5 lg:bg-cover lg:bg-center">
     <div class="container px-4 sm:px-8 lg:grid lg:grid-cols-2">
+    
       <div class="mb-16 lg:mb-0 order-1 lg:order-none">
-        
-        <img :src="downloadData?.image" alt="alternative" v-if="downloadData?.image" />
+        <div v-if="isLoading" class="skeleton-image"></div>
+        <img
+          v-else
+          :src="downloadData?.image"
+          alt="alternative"
+          v-if="downloadData?.image"
+        />
       </div>
-
       <div class="lg:mt-24 xl:mt-44 xl:ml-12 order-2 lg:order-none lg:text-left">
-        
-        <p class="mb-9 text-gray-800 text-3xl leading-10">
+        <div v-if="isLoading" class="skeleton-text mb-9"></div>
+        <p v-else class="mb-9 text-gray-800 text-3xl leading-10">
           {{ downloadData?.description }}
         </p>
         <div class="social-icons">
-          <a href="#apple" class="download-btn apple-btn">
-            <i class="fab fa-apple mr-2 text-xl"></i>
-            Download
-          </a>
-
-          <a href="#android" class="download-btn android-btn">
-            <i class="fab fa-google-play mr-2 text-base"></i>
-            Download
-          </a>
+          <div v-if=" isLoading " class =" skeleton-button "></div>
+          <div v-if=" isLoading " class =" skeleton-button "></div>
+          
+          <Button v-else/>
         </div>
       </div>
     </div>
@@ -28,34 +28,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { GetMenuListApi } from '~/services/home';
+import { ref, onMounted } from 'vue'
+import { GetMenuListApi } from '~/services/home'
 
-type Theader = { 
-  id: number;
-  description: string; 
-  title: string; 
-  image: string; 
-  type: string;
-};
-
-const menuList = ref<Theader[]>([]);
-const downloadData = ref<Theader | null>(null); 
-
-async function GetMenuListData() {
-  const { data = null, status = 500 } = await GetMenuListApi();
-  
-  if (status === 200) {
-    menuList.value = data;
-    downloadData.value = menuList.value.find(item => item.id === 4) || null;
-  } else {
-    menuList.value = [];
-  }
+type Theader = {
+  id: number
+  description: string
+  title: string
+  image: string
+  type: string
 }
 
+const props = defineProps<{
+  downloadData: Theader | null
+}>()
+const isLoading = ref(true)
+
 onMounted(() => {
-  GetMenuListData();
-});
+    isLoading.value = false
+})
+
 </script>
 
 <style scoped>
@@ -69,9 +61,76 @@ onMounted(() => {
 
 @media (min-width: 1024px) {
   .basic-5 {
-    background: url(../public/download/backgroundImage.jpg) center center no-repeat;
+    background: url(../public/download/backgroundImage.jpg) center center
+      no-repeat;
     background-position: 50%;
     background-size: cover;
+  }
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 300px; 
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-text {
+  width: 100%;
+  height: 100px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-button {
+  width: 120px; 
+  height: 40px; 
+  background-color: #e0e0e0;
+  border-radius: 40px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-image,
+.skeleton-text,
+.skeleton-button {
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@media (max-width: 1024px) {
+  .basic-5 {
+    background: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .social-icons {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .skeleton-button {
+    width: 100px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .skeleton-button {
+    width: 80px;
+    height: 32px;
   }
 }
 

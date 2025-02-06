@@ -1,83 +1,24 @@
-<template>
-  <div
-    class="backgroundColor py-28 text-center md:pt-36 lg:text-left xl:pt-44 xl:pb-32"
-  >
-    <div
-      class="container px-4 sm:px-8 lg:gap-x-8 gap-10 grid grid-cols-1 lg:grid-cols-2 justify-center items-center"
-    >
-      <div class="lg:!-mt-[0.2px]">
-        <h1
-          class="lg:-tracking-[0.5px] text-[2.75rem] lg:text-[3.125rem] font-bold !leading-[3.75rem] lg:mb-5 text-[#252C38]"
-        >
-          {{ loading ? 'Loading...':menuList[0]?.title }}
-        </h1>
-        <p
-          class="text-[1.145rem] font-normal text-lg leading-7 text-[#6b747b] mb-8 lg:mr-10"
-        >
-          {{ loading ? 'Loading...':menuList[0]?.description }}
-        </p>
-        <div class="flex flex-col md:flex-row gap-3">
-          <a
-            href="#apple"
-            class="flex gap-2 items-center justify-center px-10 py-3 bg-indigo-600 text-white rounded-[30px] text-lg cursor-pointer hover:bg-transparent hover:border-indigo-600 hover:text-indigo-600 hover:shadow-lg border border-transparent transition-all duration-300 ease-in-out"
-          >
-            <i class="fab fa-apple"></i>
-            Download
-          </a>
-
-          <a
-            href="#android"
-            class="flex gap-2 items-center justify-center px-10 py-3 bg-pink-500 text-white rounded-full text-lg cursor-pointer hover:bg-transparent hover:text-pink-500 hover:border-pink-500 border border-transparent transition-all duration-300 ease-in-out"
-          >
-            <i class="fab fa-google-play"></i>
-            Download
-          </a>
-        </div>
-      </div>
-
-      <div class="xl:text-right">
-        <img
-          src="../assets/images/smartphone.png"
-          alt="Smartphone Image"
-          class="inline"
-        />
-      </div>
-    </div>
-  </div>
-  <div class="container px-4 sm:px-8 pb-20 text-center lg:mt-[1rem]">
-    <p
-      class="text-gray-800 text-3xl leading-10 lg:max-w-5xl lg:mx-auto lg:mb-3"
-    >
-      {{ menuList[1]?.description}}
-    </p>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { GetMenuListApi } from '~/services/home';
-let loading = ref(true);
-type Theader = { id: number; title: string; description: string; };
+import MenuList from './MenuList.vue'
 
-const menuList = ref<Theader[]>([]);
-
-async function GetMenuListData() {
-  loading.value=true;
-  const { data = null, status = 500 } = await GetMenuListApi();
- 
-  if (status === 200) {
-    menuList.value = data;
-    loading.value= false;
-  } else {
-    loading.value= false;
-    menuList.value = [];
-  }
+type Theader = {
+  id: number
+  title: string
+  description: string
+  image: string
+  type: string
 }
 
-onMounted(() => {
-  GetMenuListData();
-});
+const props = defineProps<{
+  menuList: Theader[]
+}>()
 </script>
+
+<template>
+  <div>
+    <MenuList :menuList="menuList" />
+  </div>
+</template>
 
 <style scoped>
 .backgroundColor {
@@ -144,4 +85,3 @@ img {
   }
 }
 </style>
-
